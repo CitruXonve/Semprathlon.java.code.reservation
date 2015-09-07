@@ -1,12 +1,9 @@
-
-/** Sep 5, 2015 9:45:04 PM
- * PrjName:hdu1204
+/** Sep 6, 2015 9:26:29 PM
+ * PrjName:hdu5245
  * @author Semprathlon
  */
-import java.awt.Toolkit;
 import java.io.*;
 import java.util.*;
-
 public class Main {
 
 	/**
@@ -22,43 +19,36 @@ public class Main {
 		}
 		return res;
 	}
-
-	static String str;
-	static StringTokenizer tokenizer;
-
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException{
 		// TODO Auto-generated method stub
-		InputReader in = new InputReader(System.in);
-		PrintWriter out = new PrintWriter(System.out);
-		while (in.nextLine() != null) {
-			// out.println(str);
-			int n = in.nextInt();
-			int m = in.nextInt();
-			double p = in.nextDouble();
-			double q = in.nextDouble();
-			// if (br.readLine()==null) break
-			// out.println(n+" "+m+" "+p+" "+q);
-			if (n == 0)
-				out.println("0.00");
-			else if (m == 0)
-				out.println("1.00");
-			else if (p == 0 || q == 1)
-				out.println("0.00");
-			else if (p == 1 || q == 0)
-				out.println("1.00");
-			else {
-				double k = q * (1.0 - p) / p / (1.0 - q);
-				double ans = p == q ? n * 1.0 / (m + n) : (1.0 - pow(k, n)) / (1.0 - pow(k, n + m));
-				out.println(String.format("%.2f", ans));
-				// out.printf("%.2f\n", ans);
-			}
+		InputReader in=new InputReader(System.in);
+		PrintWriter out=new PrintWriter(System.out);
+		int T=in.nextInt(),cas=0;
+		while(T-->0){
+			int m=in.nextInt();
+			int n=in.nextInt();
+			int k=in.nextInt();
+			double ans=0;
+			for(int i=1;i<=m;i++)
+				for(int j=1;j<=n;j++){
+					double s=0;
+					s+=(double)(i-1)*(i-1)*n*n;
+					s+=(double)(m-i)*(m-i)*n*n;
+					s+=(double)m*m*(j-1)*(j-1);
+					s+=(double)m*m*(n-j)*(n-j);
+					s-=(double)(i-1)*(i-1)*(j-1)*(j-1);
+					s-=(double)(i-1)*(i-1)*(n-j)*(n-j);
+					s-=(double)(m-i)*(m-i)*(j-1)*(j-1);
+					s-=(double)(m-i)*(m-i)*(n-j)*(n-j);
+					ans+=1.0-pow(s/n/n/m/m, k);
+				}
+			out.println("Case #"+(++cas)+": "+Math.round(ans));
 		}
 		out.flush();
 		out.close();
 	}
 
 }
-
 class InputReader {
 	public BufferedReader reader;
 	public StringTokenizer tokenizer;

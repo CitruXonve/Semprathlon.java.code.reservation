@@ -1,9 +1,8 @@
 
-/** Sep 5, 2015 9:45:04 PM
- * PrjName:hdu1204
+/** Sep 6, 2015 8:40:50 PM
+ * PrjName:hdu5240
  * @author Semprathlon
  */
-import java.awt.Toolkit;
 import java.io.*;
 import java.util.*;
 
@@ -12,51 +11,55 @@ public class Main {
 	/**
 	 * @param args
 	 */
-	static double pow(double n, int m) {
-		double res = 1;
-		while (m > 0) {
-			if ((m & 1) > 0)
-				res = res * n;
-			n = n * n;
-			m >>= 1;
-		}
-		return res;
-	}
-
-	static String str;
-	static StringTokenizer tokenizer;
+	static ArrayList<Data> vec = new ArrayList<Data>();
 
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		InputReader in = new InputReader(System.in);
 		PrintWriter out = new PrintWriter(System.out);
-		while (in.nextLine() != null) {
-			// out.println(str);
+		int T = in.nextInt(), cas = 0;
+		while (T-- > 0) {
 			int n = in.nextInt();
-			int m = in.nextInt();
-			double p = in.nextDouble();
-			double q = in.nextDouble();
-			// if (br.readLine()==null) break
-			// out.println(n+" "+m+" "+p+" "+q);
-			if (n == 0)
-				out.println("0.00");
-			else if (m == 0)
-				out.println("1.00");
-			else if (p == 0 || q == 1)
-				out.println("0.00");
-			else if (p == 1 || q == 0)
-				out.println("1.00");
-			else {
-				double k = q * (1.0 - p) / p / (1.0 - q);
-				double ans = p == q ? n * 1.0 / (m + n) : (1.0 - pow(k, n)) / (1.0 - pow(k, n + m));
-				out.println(String.format("%.2f", ans));
-				// out.printf("%.2f\n", ans);
+			int s = 0;
+			boolean ans = true;
+			vec.clear();
+			for (int i = 1; i <= n; i++)
+				vec.add(new Data(in.nextInt(), in.nextInt(), in.nextInt()));
+			vec.sort(new Data.Comp());
+			for (int i = 0; i < vec.size(); i++) {
+				int r = vec.get(i).r;
+				int e = vec.get(i).e;
+				int l = vec.get(i).l;
+				s += r;
+				if (s > e) {
+					ans = false;
+					break;
+				}
+				s += l;
 			}
+			out.println("Case #" + (++cas) + ": " + (ans ? "YES" : "NO"));
 		}
 		out.flush();
 		out.close();
 	}
 
+}
+
+class Data {
+	int r, e, l;
+
+	Data(int _r, int _e, int _l) {
+		r = _r;
+		e = _e;
+		l = _l;
+	}
+
+	static class Comp implements Comparator<Data> {
+		// @Override
+		public int compare(Data d1, Data d2) {
+			return Integer.compare(d1.e, d2.e);
+		}
+	}
 }
 
 class InputReader {
