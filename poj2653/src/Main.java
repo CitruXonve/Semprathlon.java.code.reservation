@@ -1,5 +1,5 @@
-/** Sep 7, 2015 8:54:03 PM
- * PrjName:POJ1696
+/** Sep 8, 2015 6:14:24 PM
+ * PrjName:poj2653
  * @author Semprathlon
  */
 import java.io.*;
@@ -9,31 +9,34 @@ public class Main {
 	/**
 	 * @param args
 	 */
-	static Point[] pt;
+	static Line[] ln;
+	static LinkedList<Line> top=new LinkedList<Line>();
 	public static void main(String[] args) throws IOException{
 		// TODO Auto-generated method stub
 		InputReader in=new InputReader(System.in);
 		PrintWriter out=new PrintWriter(System.out);
-		int T=in.nextInt();
-		while(T-->0){
+		while(in.nextLine()!=null){
 			int n=in.nextInt();
-			pt=new Point[n];
-			Point minp=new Point();
+			if (n==0) break;
+			ln=new Line[n];
+			top.clear();
 			for(int i=0;i<n;i++){
-				pt[i]=new Point(in.nextInt(), in.nextInt(), in.nextInt());
-				if (i==0||i>0&&pt[i].y<minp.y) minp=pt[i];
+				ln[i]=new Line(in.nextDouble(), in.nextDouble(), in.nextDouble(), in.nextDouble());
+				ln[i].lab=i+1;
+				for(int j=0;j<top.size();)
+					if (Line.isSegInter(top.get(j), ln[i])){
+						top.remove(j);
+					}
+					else
+						j++;
+				top.add(ln[i]);
 			}
-			Point.swap(minp, pt[0]);
-			Point prep=pt[0];
-			for(int i=1;i<n;i++){
-				Arrays.sort(pt, i, n, new Point.Comp(prep));
-				prep=pt[i];
+			out.print("Top sticks: ");
+			boolean has=false;
+			for(int i=0;i<top.size();i++){
+				out.print((has?", ":"")+top.get(i).lab);has=true;
 			}
-			out.print(n);
-			for(Point p:pt)
-				out.print(" "+p.lab);
-			out.println();
-			
+			out.println('.');
 		}
 		out.flush();
 		out.close();
@@ -42,19 +45,9 @@ public class Main {
 }
 class Point{
     double x,y;
-    int lab;
     Point(){}
     Point(double _x,double _y){
         x=_x;y=_y;
-    }
-    Point(int k,double _x,double _y){
-        lab=k;
-    	x=_x;y=_y;
-    }
-    static void swap(Point a,Point b){
-    	double t1=a.x;a.x=b.x;b.x=t1;
-    	double t2=a.y;a.y=b.y;b.y=t2;
-    	int t=a.lab;a.lab=b.lab;b.lab=t;
     }
     Point(Point p){
         this(p.x,p.y);
@@ -84,23 +77,27 @@ class Point{
     	return Math.sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
     }
     public boolean equals(Point p){
-    	return dcmp(dist(this, p))==0;
+    	return dcmp(Math.sqrt((x-p.x)*(x-p.x)+(y-p.y)*(y-p.y)))==0;
     }
     final static double eps=1e-3;
     static int dcmp(double d){
             if (Math.abs(d)<eps) return 0;
             return d>0?1:-1;
     }
+    static void swap(Point a,Point b){
+    	double t1=a.x;a.x=b.x;b.x=t1;
+    	double t2=a.y;a.y=b.y;b.y=t2;
+    }
     static class Comp implements Comparator<Point>{
     	Point prep;
     	Comp(Point p){
     		prep=p;
     	}
-    	public int compare(Point a,Point b){
-    		double tmp=Vector.cross(prep, a, b);
-    		if (dcmp(tmp)==0) return -dcmp(dist(a, prep)-dist(b,prep));
-    		return -dcmp(tmp);
-    	}
+	    public int compare(Point a,Point b){
+	    	double tmp=Vector.cross(prep, a, b);
+	    	if (dcmp(tmp)==0) return -dcmp(dist(a, prep)-dist(b,prep));
+	    	return -dcmp(tmp);
+	    }
     }
 }
 class Vector extends Point{
@@ -156,13 +153,43 @@ class Vector extends Point{
     static double length(Vector r){
         return r.length();
     }
-    static int cmpslope(Vector v1,Vector v2)
-    {
-        double s1=dcmp(v1.x)==0?0:Math.cos(Math.atan2(v1.y, v1.x));
-        double s2=dcmp(v2.x)==0?0:Math.cos(Math.atan2(v2.y, v2.x));
-        return dcmp(s2-s1);
-    }
 }
+class Line extends Vector{
+	Point s,e;
+	int lab;
+	Line(Point _s,Point _e){
+		s=_s;
+		e=_e;
+	}
+	Line(double x1,double y1,double x2,double y2){
+		this(new Point(x1, y1), new Point(x2, y2));
+	}
+	static boolean isLineInter(Line l1,Line l2){
+		if (l1.s.equals(l1.e)||l2.s.equals(l2.e)) return false;
+		return dcmp(cross(l2.s, l1.s, l1.e)*cross(l2.e, l1.s, l1.e))<=0;
+	}
+	static boolean isSegInter(Point s1, Point e1, Point s2, Point e2){
+		if( dcmp(Math.min(s1.x, e1.x) - Math.max(s2.x, e2.x))<=0 &&
+				dcmp(Math.min(s1.y, e1.y) - Math.max(s2.y, e2.y))<=0 &&
+						dcmp(Math.min(s2.x, e2.x) - Math.max(s1.x, e1.x))<=0 &&
+								dcmp(Math.min(s2.y, e2.y) - Math.max(s1.y, e1.y))<=0 &&
+		        dcmp(Vector.cross(s2, e2, s1) * Vector.cross(s2, e2, e1)) <= 0 &&
+		        		dcmp(Vector.cross(s1, e1, s2) * Vector.cross(s1, e1, e2)) <= 0)
+		        return true;
+		return false;
+	}
+	static boolean isSegInter2(Point p1, Point p2, Point p3, Point p4) // 判断严格相交
+	{
+	    return dcmp(cross(p3, p4, p1)) * dcmp(cross(p3, p4, p2)) == -1;
+	}
+	static boolean isSegInter(Line l1,Line l2){
+		return isSegInter(l1.s, l1.e, l2.s, l2.e);
+	}
+	static boolean isSegInter2(Line l1,Line l2){
+		return isSegInter2(l1.s, l1.e, l2.s, l2.e);
+	}
+}
+
 class InputReader {
 	public BufferedReader reader;
 	public StringTokenizer tokenizer;
