@@ -1,9 +1,7 @@
-
-/** Sep 1, 2015 5:16:47 PM
- * PrjName:loj1205
+/** Sep 25, 2015 10:26:26 PM
+ * PrjName:zoj3816
  * @author Semprathlon
  */
-
 import java.io.*;
 import java.util.*;
 
@@ -25,6 +23,17 @@ public class Main {
 		}
 	}
 
+	static long arrtolong(int[] num){
+		long res=0L;
+		for(int i=num.length-1;i>=0;i--)
+			res=res*10L+num[i];
+		return res;
+	}
+	
+	static long update(long res,int[] num){
+		return Math.max(res, arrtolong(num));
+	}
+	static long ans;
 	static long dfs(int d, int l, int[] num, boolean fst, boolean c) {
 		if (d == 0)
 			return 1L;
@@ -37,20 +46,24 @@ public class Main {
 		for (int i = 0; i <= up; i++)
 			if (fst) {
 				num[l] = i;
+				//ans=update(ans, num);
 				if (i == 0)
 					res += dfs(d - 1, l - 1, num, true, c || i != up);
 				else
 					res += dfs(d - 1, l, num, false, c || i != up);
-			} else {
+			} 
+			else {
 				int mid = (l + 1) >> 1;
 				if (l % 2 > 0) {
 					if (d >= mid) {
 						num[d] = i;
+						//ans=update(ans, num);
 						res += dfs(d - 1, l, num, fst && i == 0, c || i != up);
 					} else if (num[2 * mid - d] == i)
 						res += dfs(d - 1, l, num, fst && i == 0, c || i != up);
 				} else if (d >= (mid + 1)) {
 					num[d] = i;
+					//ans=update(ans, num);
 					res += dfs(d - 1, l, num, fst && i == 0, c || i != up);
 				} else if (num[l + 1 - d] == i)
 					res += dfs(d - 1, l, num, fst && i == 0, c || i != up);
@@ -58,7 +71,8 @@ public class Main {
 
 		if (c && !fst)
 			f[d][l] = res;
-
+		
+		
 		return res;
 	}
 
@@ -66,7 +80,9 @@ public class Main {
 		if (n < 0)
 			return 0L;
 		getd(n);
-		return dfs(digit[0], digit[0], new int[maxl + 1], true, false);
+		ans=0L;
+		dfs(digit[0], digit[0], new int[maxl + 1], true, false);
+		return ans;
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -78,14 +94,8 @@ public class Main {
 		int T = in.nextInt(), cas = 0;
 		while (T-- > 0) {
 			long n = in.nextLong();
-			long m = in.nextLong();
-			if (n > m) {
-				long t = n;
-				n = m;
-				m = t;
-			}
 			// out.println(solve(m)+" "+solve(n-1));
-			out.println("Case " + (++cas) + ": " + (solve(m) - solve(n - 1)));
+			out.println(solve(n));
 		}
 
 		// for(int i=1;i<=maxl;i++){ for(int j=0;j<10;j++) out.print(f[i][j]+"
