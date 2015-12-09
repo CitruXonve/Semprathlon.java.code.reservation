@@ -4,11 +4,106 @@
 Please initialize it properly before using! `PriorityQueue<Integer> que=new PriorityQueue<Integer>();`##HeapThis is a minimum heap:
 
 ```class Heap {    private int maxn;    int[] data;    int r;     Heap(int size) {    	maxn=size;        data = new int[maxn];        r = 0;    }        void clear(){    	//Arrays.fill(data, 0);    	r=0;    }        public int size() {        return r;    }     void swap(int a, int b) {        int tmp = data[a];        data[a] = data[b];        data[b] = tmp;    }     void up(int p) {        if (!(p > 0))            return;        int q = p >> 1;        if (data[p] < data[q]) {            swap(p, q);            up(q);        }    }     void down(int p) {        int q;        if ((p << 1) >= r)            return;        else if ((p << 1) == r - 1) {            q = p << 1;        } else {q = (data[p << 1] < data[p << 1 | 1] ?     p << 1 : p << 1 | 1);        }        if (data[p] > data[q]) {            swap(p, q);            down(q);        }    }     void push(int n) {        data[r++] = n;        up(r - 1);    }     int pop() {        int res = data[0];        swap(0, r - 1);        r--;        down(0);        return res;    }     int top() {        return data[0];    }    }```##Adjacent Table
-```class Edge{	int v,w,nx;	Edge(int _u,int _v,int _w){		v=_u;w=_v;nx=_w;	}}class Graph{	int[] h;	int sz;	Edge[] edge;	Graph(int size){		sz=size;		h=new int[sz+1];		edge=new Edge[sz+1];		Arrays.fill(h, -1);		h[0]=0;	}	void add(int u,int v,int w){		edge[h[0]]=new Edge(v,w,h[u]);		h[u]=h[0]++;	}}```#Search
-You may find it working when you try to DFS a two-dimensional place:
-```final int[][] dir={{-1,0},{1,0},{0,-1},{0,1}};boolean can(int x,int y){		if (x<1||x>R||y<1||y>C) return false;		return true;	}
-```#Modify,Update & Query##RMQ
+```class Edge{	int v,w,nx;	Edge(int _u,int _v,int _w){		v=_u;w=_v;nx=_w;	}}class Graph{	int[] h;	int sz;	Edge[] edge;	Graph(int size){		sz=size;		h=new int[sz+1];		edge=new Edge[sz+1];		Arrays.fill(h, -1);		h[0]=0;	}	void add(int u,int v,int w){		edge[h[0]]=new Edge(v,w,h[u]);		h[u]=h[0]++;	}}```#Modify,Update & Query##RMQ
 ```void RMQ(){ //initializing->O(nlogn){    for(int i = 1; i != maxm; ++i)        for(int j = 1; j <= n; ++j)            if(j + (1 << i) - 1 <= n){                maxsum[i][j] = Math.max(maxsum[i - 1][j],                             maxsum[i - 1][j + (1 << i >> 1)]);                minsum[i][j] = Math.min(minsum[i - 1][j],                             minsum[i - 1][j + (1 << i >> 1)]);                }    }     int query(int src,int des){        int k = (int)(Math.log(des - src + 1.0) / Math.log(2.0));        int maxres = Math.max(maxsum[k][src],                           maxsum[k][des - (1 << k) + 1]);        int minres = Math.min(minsum[k][src],                           minsum[k][des - (1 << k) + 1]);        return maxres-minres;    }
+```
+
+##Segment Tree
+Suppose there are n distinct integers ranging from 1 to n,and the kth largest one is required.
+
+```
+class ST {
+	int[] l, r, m, v;
+	int sz;
+
+	ST() {
+	}
+
+	ST(int _sz) {
+		sz = _sz << 2;
+		l = new int[sz];
+		r = new int[sz];
+		m = new int[sz];
+		v = new int[sz];
+	}
+
+	void build(int k, int x, int y) {
+		l[k] = x;
+		r[k] = y;
+		m[k] = (x + y) >> 1;
+		if (x < y) {
+			build(k << 1, x, m[k]);
+			build(k << 1 | 1, m[k] + 1, y);
+		}
+		v[k] = y - x + 1;
+	}
+
+	int query(int k, int x, int y, int q) {
+		if (l[k] == r[k]) {
+			v[k] = 0;
+			return l[k];
+		}
+		int res = 0;
+		if (v[k << 1 | 1] >= q)
+			res = query(k << 1 | 1, m[k] + 1, y, q);
+		else
+			res = query(k << 1, x, m[k], q - v[k << 1 | 1]);
+		v[k] = v[k << 1] + v[k << 1 | 1];
+		return res;
+	}
+
+}
+```
+
+##Binary Indexed Tree
+Suppose there are n distinct integers ranging from 1 to n,and the kth largest one is required(use `query(k-1)`).
+
+```
+class BIT {
+	int[] data;
+	int sz;
+
+	BIT() {
+	}
+
+	BIT(int _sz) {
+		sz = _sz;
+		data = new int[sz + 1];
+	}
+
+	int lowbit(int x) {
+		return x & (-x);
+	}
+
+	void add(int p, int v) {
+		while (p <= sz) {
+			data[p] += v;
+			p += lowbit(p);
+		}
+	}
+
+	int sum(int p) {
+		int res = 0;
+		while (p > 0) {
+			res += data[p];
+			p -= lowbit(p);
+		}
+		return res;
+	}
+
+	int find(int p) {
+		int l = 1, r = sz;
+		while (l < r) {
+			int mid = (l + r) >> 1;
+			if (sum(mid) <= p)
+				l = mid + 1;
+			else
+				r = mid;
+		}
+
+		return l;
+	}
+}
 ```#Graph Theory##The Maximum Matching of Bipartite Graph
 ```boolean dfs(int u){        for(int v:adj[u]){            if (vis[v]) continue;            vis[v]=true;            if (match[v]<0||dfs(match[v])){                match[v]=u;                return true;            }        }        return false;    }int maxmatch(){        int res=0;        Arrays.fill(match, -1);        for(int i=1;i<=cnt;i++){            Arrays.fill(vis, false);            if (dfs(i)) res++;        }        return res;    }
 ```#Number Theory##Quick power and moduloTo calculate `n^m%mod`:
@@ -19,7 +114,8 @@ You may find it working when you try to DFS a two-dimensional place:
 ```
 ##Division and moduloTo calculate `n/m%mod` correctly (mod is a prime number thus `φ(mod)=mod-1`)
 
-```long div_mod(long n, long m, long mod) {		return n * pow_mod(m, mod - 2, mod) % mod;}
+```long div_mod(long n, long m, long mod) {		return n * pow_mod(m, mod - 2, mod) % mod;
+		// return n * pow_mod(m, phi(mod) - 1, mod) % mod;}
 ```
 ##Factorial and modulo
 ```void Get_Fac(long n, long mod) {		fac[0] = 1;		for (int i = 1; i <= n; i++) {			fac[i] = fac[i - 1] * i;			fac[i] %= mod;		}}
@@ -27,6 +123,24 @@ You may find it working when you try to DFS a two-dimensional place:
 ```	int[] pri,phi,fstp;	void get_prime(){		pri=new int[maxn];		fstp=new int[maxn];		phi=new int[maxn];		phi[1]=1;		for(int i=2;i<maxn;i++){			if (fstp[i]==0){				pri[++pri[0]]=i;				phi[i]=i-1;			}			for(int j=1;j<=pri[0]&&i*pri[j]<maxn;j++){				int k=i*pri[j];				fstp[k]=pri[j];				//if (fstp[i]==pri[j]){				if (i%pri[j]==0){					phi[k]=phi[i]*pri[j];					break;				}				else					phi[k]=phi[i]*(pri[j]-1);			}		}	}	Vector<Integer> get_prime_factor(int n){		Vector<Integer> res=new Vector<Integer>();		while(n>1&&fstp[n]>0){			res.add(fstp[n]);			n/=fstp[n];		}		if (n>1) res.add(n);		return res;	}```##Integer Prime Factorizationfor normal use:
 
 ```Vector<Integer> get_prime_factor(int n){        Vector<Integer> res=new Vector<Integer>();        res.clear();        for(int i=2;i*i<=n;i++)            if (n%i==0){                res.add(i);                while(n%i==0)                    n/=i;            }        if (n>1) res.add(n);        return res;    }
+```
+
+##Quick Greatest Common Divisor
+```
+int kgcd(int a, int b) {
+		if (a == 0)
+			return b;
+		if (b == 0)
+			return a;
+		if ((a & 1) == 0 && (b & 1) == 0)
+			return kgcd(a >> 1, b >> 1) << 1;
+		else if ((b & 1) == 0)
+			return kgcd(a, b >> 1);
+		else if ((a & 1) == 0)
+			return kgcd(a >> 1, b);
+		else
+			return kgcd(Math.abs(a - b), Math.min(a, b));
+}
 ```
 ##Extended Euclid TheoremSuppose `ax+by=gcd⁡(a,b)`,and the value of `x` and of `y` are required.
 
@@ -47,21 +161,62 @@ You may find it working when you try to DFS a two-dimensional place:
 ```#Computational Geometry##Double Comparing
 ```final static double eps = 1e-3;	static int dcmp(double d) {		if (Math.abs(d) < eps)			return 0;		return d > 0 ? 1 : -1;	}
 ```
-	##Point
-```class Point {	double x, y;	Point() {	}	Point(double _x, double _y) {		x = _x;		y = _y;	}	Point(Point p) {		this(p.x, p.y);	}	Point add(Point r) {		return new Point(x + r.x, y + r.y);	}	Point sub(Point r) {		return new Point(x - r.x, y - r.y);	}	Point mul(double r) {		return new Point(x * r, y * r);	}	Point move(double dx, double dy) {		return new Point(x + dx, y + dy);	}	Point rotate(double a) {		return new Point(x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a));	}	Point rotate(double dx, double dy, double a) {		return this.move(-dx, -dy).rotate(a).move(dx, dy);	}	static Point mid(Point a, Point b) {		return new Point((a.x + b.x) / 2.0, (a.y + b.y) / 2.0);	}	static double dist(Point a, Point b) {		return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));	}	public boolean equals(Point p) {		return dcmp(Math.sqrt((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y))) == 0;	}	static void swap(Point a, Point b) {		double t1 = a.x;		a.x = b.x;		b.x = t1;		double t2 = a.y;		a.y = b.y;		b.y = t2;	}	static class Comp implements Comparator<Point> {		Point prep;		Comp(Point p) {			prep = p;		}		public int compare(Point a, Point b) {			double tmp = Vector.cross(prep, a, b);			if (dcmp(tmp) == 0)				return -dcmp(dist(a, prep) - dist(b, prep));			return -dcmp(tmp);		}	}}
+
+##Platform###Point
+```class Point {	double x, y;	Point() {	}	Point(double _x, double _y) {		x = _x;		y = _y;	}	Point(Point p) {		this(p.x, p.y);	}
+	
+	static class Comp implements Comparator<Point> {		Point prep;		Comp(Point p) {			prep = p;		}		public int compare(Point a, Point b) {			double tmp = Point.cross(prep, a, b);			if (dcmp(tmp) == 0)				return -dcmp(dist(a, prep) - dist(b, prep));			return -dcmp(tmp);		}	}
 ```
-##Vector
-```class Vector extends Point {	Vector() {	}	Vector(double _x, double _y) {		x = _x;		y = _y;	}	Vector(Point a, Point b) {		this(b.x - a.x, b.y - a.y);	}	Vector(Point p) {		this(p.x, p.y);	}	static double angle(Vector a, Vector b) {		return Math.acos(dot(a, b) / a.length() / b.length());	}	static double angle(Point a, Point b) {		return angle(new Vector(a), new Vector(b));	}	static double angle(Point o, Point a, Point b) {		return angle(new Vector(o, a), new Vector(o, b));	}	double dot(Vector r) {		return x * r.x + y * r.y;	}	double cross(Vector r) {		return x * r.y - y * r.x;	}	double length() {		return Math.sqrt(this.dot(this));	}	Vector normal() {		double len = this.length();		return new Vector(-y / len, x / len);	}	static Point GetLineIntersection(Point p, Vector v, Point q, Vector w) {// 求直线交点		Vector u = new Vector(p.sub(q));		double t = cross(w, u) / cross(v, w);		return p.add(v.mul(t));	}	static Point GetLineIntersection(Point p, Point v, Point q, Point w) {		return GetLineIntersection(p, new Vector(v), q, new Vector(w));	}	static Vector add(Vector a, Vector b) {		return new Vector(a.add(b));	}	static double dot(Vector a, Vector b) {		return a.dot(b);	}	static double cross(Vector a, Vector b) {		return a.cross(b);	}	static double cross(Point a, Point b) {		return cross(new Vector(a), new Vector(b));	}	static double cross(Point o, Point a, Point b) {		return cross(new Vector(o, a), new Vector(o, b));	}	static double cross(Point a, Point b, Point c, Point d) {		return cross(new Vector(a, b), new Vector(c, d));	}	static double length(Vector r) {		return r.length();	}}
+###Vector
+```class Vector extends Point {	Vector() {	}	Vector(double _x, double _y) {		x = _x;		y = _y;	}	Vector(Point a, Point b) {		this(b.x - a.x, b.y - a.y);	}	Vector(Point p) {		this(p.x, p.y);	}}
 ```
-##Line
-```class Line extends Vector {	Point s, e;	Line() {	}	Line(Point _s, Point _e) {		s = _s;		e = _e;	}	Line(double x1, double y1, double x2, double y2) {		this(new Point(x1, y1), new Point(x2, y2));	}	Vector vector() {		return new Vector(s, e);	}	static boolean isLineInter(Line l1, Line l2) {		if (l1.s.equals(l1.e) || l2.s.equals(l2.e))			return false;		return dcmp(cross(l2.s, l1.s, l1.e) * cross(l2.e, l1.s, l1.e)) <= 0;	}	static boolean isSegInter(Point s1, Point e1, Point s2, Point e2) {		if (dcmp(Math.min(s1.x, e1.x) - Math.max(s2.x, e2.x)) <= 0				&& dcmp(Math.min(s1.y, e1.y) - Math.max(s2.y, e2.y)) <= 0				&& dcmp(Math.min(s2.x, e2.x) - Math.max(s1.x, e1.x)) <= 0				&& dcmp(Math.min(s2.y, e2.y) - Math.max(s1.y, e1.y)) <= 0				&& dcmp(Vector.cross(s2, e2, s1) * Vector.cross(s2, e2, e1)) <= 0				&& dcmp(Vector.cross(s1, e1, s2) * Vector.cross(s1, e1, e2)) <= 0)			return true;		return false;	}	static boolean isSegInter2(Point p1, Point p2, Point p3, Point p4) // 判断严格相交	{		return dcmp(cross(p3, p4, p1)) * dcmp(cross(p3, p4, p2)) == -1;	}	static boolean isSegInter(Line l1, Line l2) {		return isSegInter(l1.s, l1.e, l2.s, l2.e);	}	static boolean isSegInter2(Line l1, Line l2) {		return isSegInter2(l1.s, l1.e, l2.s, l2.e);	}}
+###Line
+```class Line extends Vector {	Point s, e;	Line() {	}	Line(Point _s, Point _e) {		s = _s;		e = _e;	}	Line(double x1, double y1, double x2, double y2) {		this(new Point(x1, y1), new Point(x2, y2));	}	Vector vector() {		return new Vector(s, e);	}}
 ```
-##Polygon
-```class Polygon extends Vector {	int num;	Point[] v;	Polygon() {	}	Polygon(int n) {		num = n;		v = new Point[num + 2];	}	boolean IsConvexBag() {		int direction = 0;// 1:counter-clockwise -1:clockwise		for (int i = 0; i < num; i++) {			int tmp = dcmp(cross(v[i], v[i + 1], v[i + 1], v[i + 2]));			if (direction == 0) // prevent co-line				direction = tmp;			if (direction * tmp < 0) // as Vec is a ConvexBag,direction*temp>=0 no matter how direction rotates				return false;		}		return true;	}}
+###Polygon
+```class Polygon extends Vector {	int num;	Point[] v;	Polygon() {	}	Polygon(int n) {		num = n;		v = new Point[num + 2];	}}
 ```
-##Round
-```class Round extends Vector {	double r;	Point o;	final static double pi = Math.acos(-1.0);	Round(double _r, double _x, double _y) {		r = _r;		x = _x;		y = _y;		o = new Point(x, y);	}	static double Rad2Deg(double rad) {		return rad * 180.0 / pi;	}	static double Deg2Rad(double deg) {		return deg * pi / 180.0;	}	double Area() {		return pi * r * r;	}	static double CommonArea(Round A, Round B) {		double area = 0.0;		Round M = dcmp(A.r - B.r) > 0 ? A : B;		Round N = dcmp(A.r - B.r) > 0 ? B : A;		double D = dist(M.o, N.o);		if (dcmp(M.r + N.r - D) > 0 && dcmp(M.r - N.r - D) < 0) {			double cosM = (M.r * M.r + D * D - N.r * N.r) / (2.0 * M.r * D);			double cosN = (N.r * N.r + D * D - M.r * M.r) / (2.0 * N.r * D);			double alpha = 2.0 * Math.acos(cosM);			double beta = 2.0 * Math.acos(cosN);			double TM = 0.5 * M.r * M.r * Math.sin(alpha);			double TN = 0.5 * N.r * N.r * Math.sin(beta);			double FM = 0.5 * alpha / pi * M.Area();			double FN = 0.5 * beta / pi * N.Area();			area = FM + FN - TM - TN;		} else if (dcmp(M.r - N.r - D) >= 0) {			area = N.Area();		}		return area;	}	/* 判断圆与多边形的关系 */	boolean IsFitPoly(Polygon pl) {		for (int i = 0; i <= pl.num; i++) {			int k = dcmp(Math.abs(cross(o, pl.v[i], o, pl.v[i + 1]) / dist(pl.v[i], pl.v[i + 1])) - r);			if (k < 0)				return false;		}		return true;	}	boolean IsInPoly(Polygon pl) {		double CircleAngle = 0.0; // 环绕角		for (int i = 1; i <= pl.num; i++) // 注意重复边不计算			if (dcmp(cross(o, pl.v[i], o, pl.v[i + 1])) >= 0)				CircleAngle += angle(o, pl.v[i], pl.v[i + 1]);			else				CircleAngle -= angle(o, pl.v[i], pl.v[i + 1]);		if (dcmp(CircleAngle) == 0) // CircleAngle=0, Peg在多边形外部			return false;		else if (dcmp(CircleAngle - pi) == 0 || dcmp(CircleAngle + pi) == 0) // CircleAngle=180,																				// Peg在多边形边上(不包括顶点)		{			if (dcmp(r) == 0)				return true;		} else if (dcmp(CircleAngle - 2 * pi) == 0 || dcmp(CircleAngle + 2 * pi) == 0) // CircleAngle=360,																						// Peg在多边形边内部			return true;		else // CircleAngle=(0,360)之间的任意角， Peg在多边形顶点上		{			if (dcmp(r) == 0)				return true;		}		return false;	}	static double TriAngleCircleInsection(Round C, Point A, Point B) {		Vector OA = new Vector(A.sub(C.o)), OB = new Vector(B.sub(C.o));		Vector BA = new Vector(A.sub(B)), BC = new Vector(C.o.sub(B));		Vector AB = new Vector(B.sub(A)), AC = new Vector(C.o.sub(A));		double DOA = OA.length(), DOB = OB.length(), DAB = AB.length(), r = C.r;		if (dcmp(cross(OA, OB)) == 0)			return 0;		if (dcmp(DOA - C.r) < 0 && dcmp(DOB - C.r) < 0)			return cross(OA, OB) * 0.5;		else if (dcmp(DOB - r) < 0 && dcmp(DOA - r) >= 0) {			double x = (dot(BA, BC) + Math.sqrt(r * r * DAB * DAB - cross(BA, BC) * cross(BA, BC))) / DAB;			double TS = cross(OA, OB) * 0.5;			return Math.asin(TS * (1 - x / DAB) * 2 / r / DOA) * r * r * 0.5 + TS * x / DAB;		} else if (dcmp(DOB - r) >= 0 && dcmp(DOA - r) < 0) {			double y = (dot(AB, AC) + Math.sqrt(r * r * DAB * DAB - cross(AB, AC) * cross(AB, AC))) / DAB;			double TS = cross(OA, OB) * 0.5;			return Math.asin(TS * (1 - y / DAB) * 2 / r / DOB) * r * r * 0.5 + TS * y / DAB;		} else if (dcmp(Math.abs(cross(OA, OB)) - r * DAB) >= 0 || dcmp(dot(AB, AC)) <= 0 || dcmp(dot(BA, BC)) <= 0) {			if (dcmp(dot(OA, OB)) < 0) {				if (dcmp(cross(OA, OB)) < 0)					return (-Math.acos(-1.0) - Math.asin(cross(OA, OB) / DOA / DOB)) * r * r * 0.5;				else					return (Math.acos(-1.0) - Math.asin(cross(OA, OB) / DOA / DOB)) * r * r * 0.5;			} else				return Math.asin(cross(OA, OB) / DOA / DOB) * r * r * 0.5;		} else {			double x = (dot(BA, BC) + Math.sqrt(r * r * DAB * DAB - cross(BA, BC) * cross(BA, BC))) / DAB;			double y = (dot(AB, AC) + Math.sqrt(r * r * DAB * DAB - cross(AB, AC) * cross(AB, AC))) / DAB;			double TS = cross(OA, OB) * 0.5;			return (Math.asin(TS * (1 - x / DAB) * 2 / r / DOA) + Math.asin(TS * (1 - y / DAB) * 2 / r / DOB)) * r * r					* 0.5 + TS * ((x + y) / DAB - 1);		}	}}
-```#String##The Knuth-Morris-Pratt Algorithm
+###Round
+```class Round extends Vector {	double r;	Point o;	Round(double _r, double _x, double _y) {		r = _r;		x = _x;		y = _y;		o = new Point(x, y);	}	double Area() {		return pi * r * r;	}}
+```
+##Function
+###Arithmetic
+```
+	double pi = Math.acos(-1.0);
+
+	double Rad2Deg(double rad) {		return rad * 180.0 / pi;	}	double Deg2Rad(double deg) {		return deg * pi / 180.0;	}
+
+	double dist(Point a, Point b) {		return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));	}
+	
+	double angle(Vector a, Vector b) {		return Math.acos(dot(a, b) / a.length() / b.length());	}	double angle(Point a, Point b) {		return angle(new Vector(a), new Vector(b));	}	double angle(Point o, Point a, Point b) {		return angle(new Vector(o, a), new Vector(o, b));	}
+		
+	double dot(Vector r) {		return x * r.x + y * r.y;	}	double cross(Vector r) {		return x * r.y - y * r.x;	}	double length() {		return Math.sqrt(this.dot(this));	}
+	
+	public boolean equals(Point p) {		return dcmp(Math.sqrt((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y))) == 0;	}
+	
+	double CommonArea(Round A, Round B) {		double area = 0.0;		Round M = dcmp(A.r - B.r) > 0 ? A : B;		Round N = dcmp(A.r - B.r) > 0 ? B : A;		double D = dist(M.o, N.o);		if (dcmp(M.r + N.r - D) > 0 && dcmp(M.r - N.r - D) < 0) {			double cosM = (M.r * M.r + D * D - N.r * N.r) / (2.0 * M.r * D);			double cosN = (N.r * N.r + D * D - M.r * M.r) / (2.0 * N.r * D);			double alpha = 2.0 * Math.acos(cosM);			double beta = 2.0 * Math.acos(cosN);			double TM = 0.5 * M.r * M.r * Math.sin(alpha);			double TN = 0.5 * N.r * N.r * Math.sin(beta);			double FM = 0.5 * alpha / pi * M.Area();			double FN = 0.5 * beta / pi * N.Area();			area = FM + FN - TM - TN;		} else if (dcmp(M.r - N.r - D) >= 0) {			area = N.Area();		}		return area;	}
+	
+	double TriAngleCircleInsection(Round C, Point A, Point B) {		Vector OA = new Vector(A.sub(C.o)), OB = new Vector(B.sub(C.o));		Vector BA = new Vector(A.sub(B)), BC = new Vector(C.o.sub(B));		Vector AB = new Vector(B.sub(A)), AC = new Vector(C.o.sub(A));		double DOA = OA.length(), DOB = OB.length(), DAB = AB.length(), r = C.r;		if (dcmp(cross(OA, OB)) == 0)			return 0;		if (dcmp(DOA - C.r) < 0 && dcmp(DOB - C.r) < 0)			return cross(OA, OB) * 0.5;		else if (dcmp(DOB - r) < 0 && dcmp(DOA - r) >= 0) {			double x = (dot(BA, BC) + Math.sqrt(r * r * DAB * DAB - cross(BA, BC) * cross(BA, BC))) / DAB;			double TS = cross(OA, OB) * 0.5;			return Math.asin(TS * (1 - x / DAB) * 2 / r / DOA) * r * r * 0.5 + TS * x / DAB;		} else if (dcmp(DOB - r) >= 0 && dcmp(DOA - r) < 0) {			double y = (dot(AB, AC) + Math.sqrt(r * r * DAB * DAB - cross(AB, AC) * cross(AB, AC))) / DAB;			double TS = cross(OA, OB) * 0.5;			return Math.asin(TS * (1 - y / DAB) * 2 / r / DOB) * r * r * 0.5 + TS * y / DAB;		} else if (dcmp(Math.abs(cross(OA, OB)) - r * DAB) >= 0 || dcmp(dot(AB, AC)) <= 0 || dcmp(dot(BA, BC)) <= 0) {			if (dcmp(dot(OA, OB)) < 0) {				if (dcmp(cross(OA, OB)) < 0)					return (-Math.acos(-1.0) - Math.asin(cross(OA, OB) / DOA / DOB)) * r * r * 0.5;				else					return (Math.acos(-1.0) - Math.asin(cross(OA, OB) / DOA / DOB)) * r * r * 0.5;			} else				return Math.asin(cross(OA, OB) / DOA / DOB) * r * r * 0.5;		} else {			double x = (dot(BA, BC) + Math.sqrt(r * r * DAB * DAB - cross(BA, BC) * cross(BA, BC))) / DAB;			double y = (dot(AB, AC) + Math.sqrt(r * r * DAB * DAB - cross(AB, AC) * cross(AB, AC))) / DAB;			double TS = cross(OA, OB) * 0.5;			return (Math.asin(TS * (1 - x / DAB) * 2 / r / DOA) + Math.asin(TS * (1 - y / DAB) * 2 / r / DOB)) * r * r					* 0.5 + TS * ((x + y) / DAB - 1);		}	}```
+###Geometry
+```
+	Point add(Point r) {		return new Point(x + r.x, y + r.y);	}	Point sub(Point r) {		return new Point(x - r.x, y - r.y);	}	Point mul(double r) {		return new Point(x * r, y * r);	}
+	
+	Point move(double dx, double dy) {		return new Point(x + dx, y + dy);	}
+		Point rotate(double a) {		return new Point(x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a));	}	Point rotate(double dx, double dy, double a) {		return this.move(-dx, -dy).rotate(a).move(dx, dy);	}	Point mid(Point a, Point b) {		return new Point((a.x + b.x) / 2.0, (a.y + b.y) / 2.0);	}	Vector normal() {		double len = this.length();		return new Vector(-y / len, x / len);	}
+		Point GetLineIntersection(Point p, Vector v, Point q, Vector w) {		Vector u = new Vector(p.sub(q));		double t = cross(w, u) / cross(v, w);		return p.add(v.mul(t));	}	Point GetLineIntersection(Point p, Point v, Point q, Point w) {		return GetLineIntersection(p, new Vector(v), q, new Vector(w));	}
+	
+```
+###Judge
+```
+	boolean isLineInter(Line l1, Line l2) {		if (l1.s.equals(l1.e) || l2.s.equals(l2.e))			return false;		return dcmp(cross(l2.s, l1.s, l1.e) * cross(l2.e, l1.s, l1.e)) <= 0;	}	boolean isSegInter(Point s1, Point e1, Point s2, Point e2) {		if (dcmp(Math.min(s1.x, e1.x) - Math.max(s2.x, e2.x)) <= 0				&& dcmp(Math.min(s1.y, e1.y) - Math.max(s2.y, e2.y)) <= 0				&& dcmp(Math.min(s2.x, e2.x) - Math.max(s1.x, e1.x)) <= 0				&& dcmp(Math.min(s2.y, e2.y) - Math.max(s1.y, e1.y)) <= 0				&& dcmp(Vector.cross(s2, e2, s1) * Vector.cross(s2, e2, e1)) <= 0				&& dcmp(Vector.cross(s1, e1, s2) * Vector.cross(s1, e1, e2)) <= 0)			return true;		return false;	}	boolean isSegInter2(Point p1, Point p2, Point p3, Point p4) // vigorous intersection	{		return dcmp(cross(p3, p4, p1)) * dcmp(cross(p3, p4, p2)) == -1;	}	boolean isSegInter(Line l1, Line l2) {		return isSegInter(l1.s, l1.e, l2.s, l2.e);	}	boolean isSegInter2(Line l1, Line l2) {		return isSegInter2(l1.s, l1.e, l2.s, l2.e);	}
+	
+	boolean IsConvexBag() {		int direction = 0;// 1:counter-clockwise -1:clockwise		for (int i = 0; i < num; i++) {			int tmp = dcmp(cross(v[i], v[i + 1], v[i + 1], v[i + 2]));			if (direction == 0) // prevent co-line				direction = tmp;			if (direction * tmp < 0) // as Vec is a ConvexBag,direction*temp>=0 no matter how direction rotates				return false;		}		return true;	}
+	
+	boolean IsInPoly(Polygon pl) {		double CircleAngle = 0.0; // rotation angle		for (int i = 1; i <= pl.num; i++) // ignore the repetitive edges			if (dcmp(cross(o, pl.v[i], o, pl.v[i + 1])) >= 0)				CircleAngle += angle(o, pl.v[i], pl.v[i + 1]);			else				CircleAngle -= angle(o, pl.v[i], pl.v[i + 1]);		if (dcmp(CircleAngle) == 0) // CircleAngle=0, Peg outside			return false;		else if (dcmp(CircleAngle - pi) == 0 || dcmp(CircleAngle + pi) == 0) // CircleAngle=180,																				// Peg inside(excluding vertices)		{			if (dcmp(r) == 0)				return true;		} else if (dcmp(CircleAngle - 2 * pi) == 0 || dcmp(CircleAngle + 2 * pi) == 0) // CircleAngle=360, Peg inside			return true;		else // CircleAngle in range (0,360)， Peg on the vertex		{			if (dcmp(r) == 0)				return true;		}		return false;	}
+	
+	boolean IsFitPoly(Polygon pl) {		for (int i = 0; i <= pl.num; i++) {			int k = dcmp(Math.abs(cross(o, pl.v[i], o, pl.v[i + 1]) / dist(pl.v[i], pl.v[i + 1])) - r);			if (k < 0)				return false;		}		return true;	}
+```
+#String##The Knuth-Morris-Pratt Algorithm
 ```class KMP {	static int next[];	static void getNext(String T) {		next = new int[T.length() + 1];		int j = 0, k = -1;		next[0] = -1;		while (j < T.length())			if (k == -1 || T.charAt(j) == T.charAt(k))				next[++j] = ++k;			else				k = next[k];	}	static int Index(String S, String T) {		int i = 0, j = 0;		getNext(T);		for (i = 0; i < S.length() && j < T.length(); i++) {			while (j > 0 && S.charAt(i) != T.charAt(j))				j = next[j];			if (S.charAt(i) == T.charAt(j))				j++;		}		if (j == T.length())			return i - T.length();		else			return -1;	}	static int Count(String S, String T) {		int res = 0, j = 0;		if (S.length() == 1 && T.length() == 1) {			if (S.charAt(0) == T.charAt(0))				return 1;			else				return 0;		}		getNext(T);		for (int i = 0; i < S.length(); i++) {			while (j > 0 && S.charAt(i) != T.charAt(j))				j = next[j];			if (S.charAt(i) == T.charAt(j))				j++;			if (j == T.length()) {				res++;				j = next[j];			}		}		return res;	}}```##Aho-Corasick automaton
 ```class AC {	final int maxl = 500010, maxc = 26;	final char fstc = 'a';	int root, L;	int[][] next;	int[] fail, end;	Queue<Integer> que = new LinkedList<Integer>();	AC() {		next = new int[maxl][maxc];		fail = new int[maxl];		end = new int[maxl];		L = 0;		root = newnode();	}	void clear() {		Arrays.fill(fail, 0);		Arrays.fill(end, 0);		L = 0;		root = newnode();	}	int newnode() {		Arrays.fill(next[L], -1);		end[L++] = 0;		return L - 1;	}	void insert(String str) {		int now = root;		for (int i = 0; i < str.length(); i++) {			char ch = str.charAt(i);			if (next[now][ch - fstc] == -1)				next[now][ch - fstc] = newnode();			now = next[now][ch - fstc];		}		end[now]++;	}	void build() {		que.clear();		fail[root] = root;		for (int i = 0; i < maxc; i++)			if (next[root][i] == -1)				next[root][i] = root;			else {				fail[next[root][i]] = root;				que.add(next[root][i]);			}		while (!que.isEmpty()) {			int now = que.poll();			for (int i = 0; i < maxc; i++)				if (next[now][i] == -1)					next[now][i] = next[fail[now]][i];				else {					fail[next[now][i]] = next[fail[now]][i];					que.add(next[now][i]);				}		}	}	int query(String str) {		int now = root, res = 0;		for (int i = 0; i < str.length(); i++) {			char ch = str.charAt(i);			now = next[now][ch - fstc];			int tmp = now;			while (tmp != root) {				res += end[tmp];				// end[tmp] = 0;				tmp = fail[tmp];			}		}		return res;	}}
 ```#Network Flowing##Dinic
