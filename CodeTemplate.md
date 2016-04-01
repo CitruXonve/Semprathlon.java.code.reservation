@@ -141,8 +141,66 @@ class BIT {
 ```
 ##Factorial and modulo 阶乘取模
 ```void Get_Fac(long n, long mod) {		fac[0] = 1;		for (int i = 1; i <= n; i++) {			fac[i] = fac[i - 1] * i;			fac[i] %= mod;		}}
-```##Prime filtering (linear) && Calculating Euler function `φ(x)` 线性筛质数并求欧拉函数值
-```	int[] pri,phi,fstp;	void get_prime(){		pri=new int[maxn];		fstp=new int[maxn];		phi=new int[maxn];		phi[1]=1;		for(int i=2;i<maxn;i++){			if (fstp[i]==0){				pri[++pri[0]]=i;				phi[i]=i-1;			}			for(int j=1;j<=pri[0]&&i*pri[j]<maxn;j++){				int k=i*pri[j];				fstp[k]=pri[j];				//if (fstp[i]==pri[j]){				if (i%pri[j]==0){					phi[k]=phi[i]*pri[j];					break;				}				else					phi[k]=phi[i]*(pri[j]-1);			}		}	}	Vector<Integer> get_prime_factor(int n){		Vector<Integer> res=new Vector<Integer>();		while(n>1&&fstp[n]>0){			res.add(fstp[n]);			n/=fstp[n];		}		if (n>1) res.add(n);		return res;	}```##Integer Prime Factorization 分解质因数
+```##Prime filtering (linear) 线性筛质数
+```	int[] pri,fstp;	void filter_prime(){		pri=new int[maxn];		fstp=new int[maxn];		for(int i=2;i<maxn;i++){			if (fstp[i]==0){				pri[++pri[0]]=i;			}			for(int j=1;j<=pri[0]&&i*pri[j]<maxn;j++){				int k=i*pri[j];				fstp[k]=pri[j];			}		}	}```
+
+##Calculating Euler function `φ(n)` 求欧拉函数值
+
+```
+	int[] pri,phi,fstp;
+	void cal_euler(){
+        pri=new int[maxn];
+        fstp=new int[maxn];
+        phi=new int[maxn];
+        phi[1]=1;
+        for(int i=2;i<maxn;i++){
+            if (fstp[i]==0){
+                pri[++pri[0]]=i;
+                phi[i]=i-1;
+            }
+            for(int j=1;j<=pri[0]&&i*pri[j]<maxn;j++){
+                int k=i*pri[j];
+                fstp[k]=pri[j];
+                if (i%pri[j]==0){
+                    phi[k]=phi[i]*pri[j];
+                    break;
+                }
+                else{
+                    phi[k]=phi[i]*(pri[j]-1);
+                }
+            }
+        }
+    }
+```
+
+##Calculating Möbius function `μ(n)` 求莫比乌斯函数值
+
+```
+	int[] pri,fstp,miu;
+	void cal_euler(){
+        pri=new int[maxn];
+        fstp=new int[maxn];
+        miu=new int[maxn];
+        miu[1]=1;
+        for(int i=2;i<maxn;i++){
+            if (fstp[i]==0){
+                pri[++pri[0]]=i;
+                miu[i]=-1;
+            }
+            for(int j=1;j<=pri[0]&&i*pri[j]<maxn;j++){
+                int k=i*pri[j];
+                fstp[k]=pri[j];
+                if (i%pri[j]==0){
+                    miu[k]=0;
+                    break;
+                }
+                else{
+                    miu[k]=-miu[i];
+                }
+            }
+        }
+    }
+```##Integer Prime Factorization 分解质因数
 ```Vector<Integer> get_prime_factor(int n){        Vector<Integer> res=new Vector<Integer>();        res.clear();        for(int i=2;i*i<=n;i++)            if (n%i==0){                res.add(i);                while(n%i==0)                    n/=i;            }        if (n>1) res.add(n);        return res;    }
 ```
 
