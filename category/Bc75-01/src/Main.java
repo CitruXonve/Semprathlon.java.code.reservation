@@ -1,73 +1,31 @@
 /**
- * Mar 17, 2016 10:16:51 PM
- * PrjName: hdu5542
+ * Mar 12, 2016 7:02:10 PM
+ * PrjName: Bc75-01
  * @semprathlon
  */
+
 import java.io.*;
 import java.util.*;
 public class Main {
-	static int[][] f;
-	static int[] a,b;
-	final static int mod=1000000007;
-	static int lowbit(int x) {
-        return x & (-x);
-    }
-
-    static void add(int y,int p, int v,int sz) {
-        while (p <= sz) {
-            f[p][y] += v;
-            f[p][y]%=mod;
-            p += lowbit(p);
-        }
-    }
-
-    static int sum(int y,int p) {
-        int res = 0;
-        while (p > 0) {
-            res += f[p][y];
-            res%=mod;
-            p -= lowbit(p);
-        }
-        return res;
-    }
 	public static void main(String[] args) throws IOException{
 		InputReader in=new InputReader(System.in);
 		PrintWriter out=new PrintWriter(System.out);
-		int T=in.nextInt(),cas=0;
+		int T=in.nextInt();
 		while(T-->0){
 			int n=in.nextInt();
 			int m=in.nextInt();
-			a=new int[n+1];
-			f=new int[n+1][m+1]; 
-			for(int i=1;i<=n;i++)
-				a[i]=in.nextInt();
-			b=a.clone();
-			Arrays.sort(b);
-			for(int i=1;i<=n;i++)
-				a[i]=Arrays.binarySearch(b, a[i]);
-			/*for(int i=1;i<=n;i++)
-				out.print(a[i]+" ");
-			out.println();*/
-			for(int i=1;i<=n;i++){
-//				f[i][1]=1;
-				add(1, a[i], 1,n);
-				for(int j=2;j<=Math.min(i, m);j++){
-					int tmp=sum(j-1, a[i]-1);
-					add(j, a[i], tmp, n);
-					/*for(int k=j-1;k<i;k++)
-					if (a[i]>a[k]){
-						f[i][j]+=f[k][j-1];
-						f[i][j]%=mod;
-					}*/
-					//f[i][j]%=mod;
+			
+			int ans=0;
+			while(n>0&&m>0){
+				if (n<m){
+					n=n^m;
+					m=n^m;
+					n=n^m;
 				}
+				int t=m;m=n-t;n=t;
+				ans++;
 			}
-			/*for(int i=1;i<=n;i++){
-				for(int j=1;j<=m;j++)
-					out.print(f[i][j]+" ");
-				out.println();
-			}*/
-			out.println("Case #"+(++cas)+": "+sum(m, n));
+			out.println(ans);
 		}
 		out.flush();
 		out.close();

@@ -4,15 +4,64 @@
 
 
 #Input 输入An enhanced `InputReader` supporting keeping reading data until the end of input while the number of input cases is unknown:  
-一个加强版的`输入器` ，支持读到输入文件末尾的方式:
+一个加强版的`输入器` ，支持读到输入文件末尾的方式，用法类似`java.util.Scanner`但效率显著提高:
 
-```class InputReader {	public BufferedReader reader;	public StringTokenizer tokenizer;	public InputReader(InputStream stream) {		reader = new BufferedReader(new InputStreamReader(stream), 32768);		tokenizer = null;	}	public String nextLine() {		String tmp = null;		try {			tmp = reader.readLine();			tokenizer = new StringTokenizer(tmp);		} catch (IOException e) {			throw new RuntimeException(e);		} catch (NullPointerException e) {			return null;		}		return tmp;	}	public String next() {		while (tokenizer == null || !tokenizer.hasMoreTokens()) {			try {				tokenizer = new StringTokenizer(reader.readLine());			} catch (IOException e) {				throw new RuntimeException(e);			}		}		return tokenizer.nextToken();	}	public int nextInt() {		return Integer.parseInt(next());	}	public long nextLong() {		return Long.parseLong(next());	}	public double nextDouble() {		return Double.parseDouble(next());	}}```
+```class InputReader {
+	public BufferedReader reader;
+	public StringTokenizer tokenizer;
+
+	public InputReader(InputStream stream) {
+		reader = new BufferedReader(new InputStreamReader(stream), 32768);
+		tokenizer = null;
+	}
+
+	public boolean hasNext() {
+		return tokenizer != null && tokenizer.hasMoreTokens() || nextLine() != null;
+	}
+
+	public String nextLine() {
+		String tmp = null;
+		try {
+			tmp = reader.readLine();
+			tokenizer = new StringTokenizer(tmp);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (NullPointerException e) {
+			return null;
+		}
+		return tmp;
+	}
+
+	public String next() {
+		while (tokenizer == null || !tokenizer.hasMoreTokens()) {
+			try {
+				tokenizer = new StringTokenizer(reader.readLine());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return tokenizer.nextToken();
+	}
+
+	public int nextInt() {
+		return Integer.parseInt(next());
+	}
+
+	public long nextLong() {
+		return Long.parseLong(next());
+	}
+
+	public double nextDouble() {
+		return Double.parseDouble(next());
+	}
+}
+```
 
 Keeping reading data until the end of input：  
 读取数据直至文件末尾：
 
 ```
-while(in.nextLine!=null){
+while(in.hasNext()){
 //TODO ...
 }
 ```#Data Structure 数据结构篇##Queue 队列`Queue<Integer> que=new LinkedList<Integer>();`##Priority Queue 优先队列
@@ -123,9 +172,84 @@ class BIT {
 		return l;
 	}
 }
-```#Graph Theory 图论篇##The Maximum Matching of Bipartite Graph 二分图最大匹配（匈牙利算法）
+```#Graph Theory 图论篇
+##Topological Sorting 拓扑排序
+
+```
+int[] degree;
+boolean[][] arc;
+Vector<Integer> ans;
+PriorityQueue<Integer> que;
+
+void Topo(int n) {
+		for (int u = 1; u <= n; u++)
+			if (degree[u] == 0) {
+				que.add(u);
+			}
+		while (!que.isEmpty()) {
+			int u = que.poll();
+			ans.add(u);
+			for (int v = 1; v <= n; v++) {
+				if (arc[u][v]) {
+					degree[v]--;
+					if (degree[v] == 0) {
+						que.add(v);
+					}
+				}
+			}
+		}
+}
+```
+##Hungarian Algorithm 二分图最大匹配 - 匈牙利算法
 ```boolean dfs(int u){        for(int v:adj[u]){            if (vis[v]) continue;            vis[v]=true;            if (match[v]<0||dfs(match[v])){                match[v]=u;                return true;            }        }        return false;    }int maxmatch(){        int res=0;        Arrays.fill(match, -1);        for(int i=1;i<=cnt;i++){            Arrays.fill(vis, false);            if (dfs(i)) res++;        }        return res;    }
-```#Number Theory 数论篇##Quick power and modulo 快速幂取模To calculate `n^m%mod`:  
+```#Number Theory 数论篇
+##Extended Euclid Theorem 扩展欧几里得定理Suppose `ax+by=gcd⁡(a,b)`,and the value of `x` and of `y` are required.  
+已知`ax+by=gcd⁡(a,b)`，求x与y的值。  
+注意x与y中很可能有一个是负整数。  
+
+```
+long x,y;void extgcd(long a, long b) {		if (b == 0L) {			x = 1L;			y = 0L;			return;		}		extgcd(b, a % b);		long t = x;		x = y;		y = t - a / b * y;}
+```
+
+##Modular multiplicative inverse 模逆元
+a^(-1)≡b (mod n),a·a^(-1)≡1 (mod n).
+
+The modular multiplicative inverse of a modulo m can be found with the extended Euclidean algorithm.  
+设exgcd(a,n)为扩展欧几里得算法的函数，则可得到ax+ny=gcd(a,n).  
+若g=1，则该模逆元存在，根据结果ax+ny=1.  
+在mod n之下，ax+ny≡ax≡1，根据模逆元的定义，此时x即为a关于模n的其中一个模逆元。  
+事实上，x+kn(k∈Z) 都是a关于模n的模逆元，这里取最小的正整数解x mod n(x<n)。  
+若g≠1，则该模逆元不存在。  
+
+```
+long cal_inv(long n, long mod) {
+		extgcd(n, mod);
+		return x < 0L ? (x + mod) % mod : x % mod;
+}
+```
+
+According to Euler's theorem, if a is coprime to m, that is, gcd(a, m) = 1, then a^φ(m)≡1 (mod m),where φ(m) is Euler's totient function.   
+This follows from the fact that a belongs to the multiplicative group (Z/mZ)× iff a is coprime to m. Therefore the modular multiplicative inverse can be found directly:  
+a^φ(m)-1≡a^(-1) (mod m).  
+In the special case when m is a prime, the modular inverse is given by the below equation as: a^(-1)≡a^(m-2) (mod m).  
+欧拉函数求逆元：  
+
+```
+long cal_inv(long n, long mod) {
+		return pow_mod(n, phi[mod] - 1, mod);
+}
+```
+
+通过递推的方式，在线性时间复杂度内求出逆元：
+
+```
+void cal_inv(int maxn, long mod) {
+		inv[1] = 1;
+		for (int i = 2; i < maxn; i++)
+			inv[i] = (mod - mod / i) * inv[(int) (mod % i)] % mod;
+}
+```
+##Quick power and modulo 快速幂取模To calculate `n^m%mod`:  
 计算`n^m%mod`：  
 
 ```long pow_mod(long n, long m, long mod) {		long res = 1L;		n %= mod;		while (m > 0L) {			if ((m & 1L) > 0L)				res = res * n % mod;			n = n * n % mod;			m >>= 1;		}		return res;}```##Multiply and modulo 乘法取模To calculate `(nm)%mod`:  
@@ -133,11 +257,19 @@ class BIT {
 
 ```long mul_mod(long n, long m, long mod) {		long ans = 0L;		n %= mod;		while (m > 0L) {			if ((m & 1L) > 0L)				ans = (ans + n) % mod;			m >>= 1;			n = (n + n) % mod;		}		return ans;}
 ```
-##Division and modulo 除法取模To calculate `n/m%mod` correctly (mod is a prime number thus `φ(mod)=mod-1`):  
-计算`n/m%mod`（当mod是一个质数时有`φ(mod)=mod-1`）：
+##Division and modulo 除法取模To calculate `n/m%mod` correctly (mod is a prime number thus `φ(mod)=mod-1`).   
+利用欧拉函数计算`n/m%mod`（当mod是一个质数时有`φ(mod)=mod-1`）：
 
 ```long div_mod(long n, long m, long mod) {		return n * pow_mod(m, mod - 2, mod) % mod;
 		// return n * pow_mod(m, phi(mod) - 1, mod) % mod;}
+```
+In other words,use modular multiplicative inverse.  
+或者直接使用模逆元：
+
+```
+long div_mod(long n, long m, long mod) {
+		return n * inv[(int) m] % mod;
+}
 ```
 ##Factorial and modulo 阶乘取模
 ```void Get_Fac(long n, long mod) {		fac[0] = 1;		for (int i = 1; i <= n; i++) {			fac[i] = fac[i - 1] * i;			fac[i] %= mod;		}}
@@ -221,30 +353,45 @@ int kgcd(int a, int b) {
 			return kgcd(Math.abs(a - b), Math.min(a, b));
 }
 ```
-##Extended Euclid Theorem 扩展欧几里得定理Suppose `ax+by=gcd⁡(a,b)`,and the value of `x` and of `y` are required.  
-已知`ax+by=gcd⁡(a,b)`，求x与y的值。  
 
-```void extgcd(long a, long b) {		if (b == 0L) {			x = 1L;			y = 0L;			return;		}		extgcd(b, a % b);		long t = x;		x = y;		y = t - a / b * y;}
-```##Lucas Theorem 卢卡斯定理`C(n, m, mod)` refers to `C_n^m%mod`.  
-`C(n, m, mod)`表示`C_n^m%mod`。  
-
-```long Lucas(long n, long m, long mod) {		long ret = 1L;		while (n > 0L && m > 0L) {			if (n % mod < m % mod)				return 0L;			ret = mul_mod(ret, C(n, m, mod), mod);			ret %= mod;			n /= mod;			m /= mod;		}		return ret;}
-```
 ##Chinese Remainer Theorem 中国剩余定理Resolving `x ≡a_1  (mod m_1),x ≡a_2  (mod m_2 ),…,x ≡a_n  (mod m_n))`.  
 解同余方程组`x ≡a_1  (mod m_1),x ≡a_2  (mod m_2 ),…,x ≡a_n  (mod m_n))`。  
 
 ```long CRT(long n, long[] a, long[] m) {		long pro = 1L, res = 0L;		for (int i = 0; i < n; i++)			pro *= m[i];		for (int i = 0; i < n; i++) {			long w = pro / m[i];			extgcd(m[i], w);			res = (res + mul_mod(y, mul_mod(w, a[i], pro), pro)) % pro;		}		return (res + pro) % pro;}
 ```#Combinatorial Mathematics 组合数学篇##Combination Calculation #1 组合数计算1
+C(n,m)=C(n-1,m)+C(n-1,m-1).  
+
 ```double[][] c;void init(){		c=new double[maxn][maxn];		c[0][0]=1;		for(int i=1;i<maxn;i++){			c[i][0]=c[i][i]=1;			for(int j=1;j<i;j++)				c[i][j]=c[i-1][j]+c[i-1][j-1];		}	}
 ```
 	##Combination Calculation #2 组合数计算2It is guaranteed that n≥m,but n! should be computed in advance.
 
 ```long C(long n, long m, long mod) {		int a = (int) (n % mod), b = (int) (m % mod);		return div_mod(fac[a], mul_mod(fac[a - b], fac[b], mod), mod);}
-```#Computational Geometry 计算几何篇##Double Comparing 实数的比较
+```
+
+##Lucas Theorem 卢卡斯定理`C(n, m, mod)` refers to `C_n^m%mod`.  
+`C(n, m, mod)`表示`C_n^m%mod`。  
+
+```long Lucas(long n, long m, long mod) {		long ret = 1L;		while (n > 0L && m > 0L) {			if (n % mod < m % mod)				return 0L;			ret = mul_mod(ret, C(n, m, mod), mod);			ret %= mod;			n /= mod;			m /= mod;		}		return ret;}
+```
+
+##Catalan number 卡塔兰数
+C(1)=1,C(n)=C(n-1)*(4n-2)/(n+1);
+
+```
+long C[];
+void get_Catalan(int maxn) {
+		C[1] = 1;
+		for (int i = 2; i < maxn - 1; i++) {
+			C[i] = C[i - 1] * ((i << 2) - 2) % mod;
+			C[i] = div_mod(C[i], i + 1, mod);
+		}
+}
+```
+#Computational Geometry 计算几何篇##Double Comparing 实数的比较
 ```final static double eps = 1e-3;	static int dcmp(double d) {		if (Math.abs(d) < eps)			return 0;		return d > 0 ? 1 : -1;	}
 ```
 
-##Platform 几何框架###Point 点
+##Platform 几何类框架###Point 点
 ```class Point {	double x, y;	Point() {	}	Point(double _x, double _y) {		x = _x;		y = _y;	}	Point(Point p) {		this(p.x, p.y);	}
 	
 	static class Comp implements Comparator<Point> {		Point prep;		Comp(Point p) {			prep = p;		}		public int compare(Point a, Point b) {			double tmp = Point.cross(prep, a, b);			if (dcmp(tmp) == 0)				return -dcmp(dist(a, prep) - dist(b, prep));			return -dcmp(tmp);		}	}

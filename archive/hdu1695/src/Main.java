@@ -1,73 +1,63 @@
-/**
- * Mar 17, 2016 10:16:51 PM
- * PrjName: hdu5542
- * @semprathlon
- */
 import java.io.*;
 import java.util.*;
 public class Main {
-	static int[][] f;
-	static int[] a,b;
-	final static int mod=1000000007;
-	static int lowbit(int x) {
-        return x & (-x);
-    }
-
-    static void add(int y,int p, int v,int sz) {
-        while (p <= sz) {
-            f[p][y] += v;
-            f[p][y]%=mod;
-            p += lowbit(p);
+	final static int maxn=100010;
+	static int[] pri,phi,fstp,miu;
+    static void get_prime(){
+        pri=new int[maxn];
+        fstp=new int[maxn];
+        phi=new int[maxn];
+        miu=new int[maxn];
+        phi[1]=1;
+        miu[1]=1;
+        for(int i=2;i<maxn;i++){
+            if (fstp[i]==0){
+                pri[++pri[0]]=i;
+                phi[i]=i-1;
+                miu[i]=-1;
+            }
+            for(int j=1;j<=pri[0]&&i*pri[j]<maxn;j++){
+                int k=i*pri[j];
+                fstp[k]=pri[j];
+                //if (fstp[i]==pri[j]){
+                if (i%pri[j]==0){
+                    phi[k]=phi[i]*pri[j];
+                    miu[k]=0;
+                    break;
+                }
+                else{
+                    phi[k]=phi[i]*(pri[j]-1);
+                    miu[k]=-miu[i];
+                }
+            }
         }
-    }
-
-    static int sum(int y,int p) {
-        int res = 0;
-        while (p > 0) {
-            res += f[p][y];
-            res%=mod;
-            p -= lowbit(p);
-        }
-        return res;
     }
 	public static void main(String[] args) throws IOException{
 		InputReader in=new InputReader(System.in);
 		PrintWriter out=new PrintWriter(System.out);
 		int T=in.nextInt(),cas=0;
+		get_prime();
 		while(T-->0){
+			in.nextInt();
 			int n=in.nextInt();
+			in.nextInt();
 			int m=in.nextInt();
-			a=new int[n+1];
-			f=new int[n+1][m+1]; 
-			for(int i=1;i<=n;i++)
-				a[i]=in.nextInt();
-			b=a.clone();
-			Arrays.sort(b);
-			for(int i=1;i<=n;i++)
-				a[i]=Arrays.binarySearch(b, a[i]);
-			/*for(int i=1;i<=n;i++)
-				out.print(a[i]+" ");
-			out.println();*/
-			for(int i=1;i<=n;i++){
-//				f[i][1]=1;
-				add(1, a[i], 1,n);
-				for(int j=2;j<=Math.min(i, m);j++){
-					int tmp=sum(j-1, a[i]-1);
-					add(j, a[i], tmp, n);
-					/*for(int k=j-1;k<i;k++)
-					if (a[i]>a[k]){
-						f[i][j]+=f[k][j-1];
-						f[i][j]%=mod;
-					}*/
-					//f[i][j]%=mod;
-				}
+			int k=in.nextInt();
+			if (k==0){
+				out.println("Case "+(++cas)+": 0");
+				continue;
 			}
-			/*for(int i=1;i<=n;i++){
-				for(int j=1;j<=m;j++)
-					out.print(f[i][j]+" ");
-				out.println();
-			}*/
-			out.println("Case #"+(++cas)+": "+sum(m, n));
+			n/=k;m/=k;
+			if (n>m){
+				int t=n;n=m;m=t;
+			}
+			long ans=0;
+			for(int i=1;i<=n;i++)
+				ans-=(long)miu[i]*(n/i)*(n/i);
+			ans/=2;
+			for(int i=1;i<=n;i++)
+				ans+=(long)miu[i]*(n/i)*(m/i);
+			out.println("Case "+(++cas)+": "+ans);
 		}
 		out.flush();
 		out.close();
