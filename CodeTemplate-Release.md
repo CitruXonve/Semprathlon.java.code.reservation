@@ -4,6 +4,8 @@
   Java Code Template By Semprathlon
 </h1>
 
+*   部分理论知识引用自维基百科 *
+
 <!--more-->
 
 # Input 输入
@@ -382,31 +384,31 @@ void extgcd(long a, long b) {
 
 ## Modular multiplicative inverse 模逆元
 
-$latex a^{-1}≡b (mod n),a·a^{-1}≡1 (mod n).$
+$latex a^{-1} \equiv b \pmod{n},a \cdot a^{-1} \equiv 1.$
 
 The modular multiplicative inverse of $latex a$ modulo $latex m$ can be found with the extended Euclidean algorithm.  
 设`exdgcd(a,n)`为扩展欧几里得算法的函数，则可得到$latex ax+ny=gcd(a,n)$.  
 若$latex g=1$，则该模逆元存在，根据结果$latex ax+ny=1$.  
-在$latex mod n$之下，$latex ax+ny≡ax≡1$，根据模逆元的定义，此时$latex x$即为$latex a$关于模$latex n$的其中一个模逆元。  
-事实上，$latex x+kn(k∈Z) $都是$latex a$关于模$latex n$的模逆元，这里取最小的正整数解$latex x mod n(x<n)$。  
-若$latex g≠1$，则该模逆元不存在。
+在$latex \mod{n}$之下，$latex ax+ny \equiv ax \equiv 1$，根据模逆元的定义，此时$latex x$即为$latex a$关于模$latex n$的其中一个模逆元。  
+事实上，$latex x+kn(k \in \mathbb{Z}) $都是$latex a$关于模$latex n$的模逆元，这里取最小的正整数解$latex x\mod{n}(x<n)$。  
+若$latex g\ne 1$，则该模逆元不存在。
 
 <pre class="toolbar:2 wrap:true lang:java decode:true " >long cal_inv(long n, long mod) {
         extgcd(n, mod);
         return x &lt; 0L ? (x + mod) % mod : x % mod;
 }</pre>
 
-According to Euler's theorem, if $latex a$ is coprime to $latex m$, that is, $latex gcd(a, m) = 1$, then $latex a^φ(m)≡1 (mod m)$,where $latex φ(m)$ is Euler's totient function.  
-This follows from the fact that a belongs to the multiplicative group $latex (Z/mZ)× iff$ a is coprime to m. Therefore the modular multiplicative inverse can be found directly:  
-$latex a^{φ(m)-1}≡a^{-1} (mod m)$.  
-In the special case when $latex m$ is a prime, the modular inverse is given by the below equation as: $latex a^{-1}≡a^{m-2} (mod m)$.  
-欧拉函数求逆元：
+According to Euler's theorem, if $latex a$ is coprime to $latex m$, that is, $latex gcd(a, m) = 1$, then $latex a^φ(m)≡1\pmod{m}$,where $latex φ(m)$ is Euler's totient function.  
+This follows from the fact that a belongs to the multiplicative group $latex (Z/mZ)^×$ iff a is coprime to m. Therefore the modular multiplicative inverse can be found directly:  
+$latex a^{φ(m)-1}≡a^{-1}\pmod{m}$.  
+In the special case when $latex m$ is a prime, the modular inverse is given by the below equation as: $latex a^{-1}≡a^{m-2}\pmod{m}$.  
+欧拉函数求单个逆元：
 
 <pre class="toolbar:2 wrap:true lang:java decode:true " >long cal_inv(long n, long mod) {
         return pow_mod(n, phi[mod] - 1, mod);
 }</pre>
 
-通过递推的方式，在线性时间复杂度内求出逆元：
+通过递推的方式，在线性时间复杂度内求出若干个逆元：
 
 <pre class="toolbar:2 wrap:true lang:java decode:true " >void cal_inv(int maxn, long mod) {
         inv[1] = 1;
@@ -434,7 +436,7 @@ To calculate $latex n^m\%mod $:
 ## Multiply and modulo 乘法取模
 
 To calculate $latex (nm)\% mod $:  
-计算$latex (nm)\% mod $：
+在$latex n$和$latex m$的值都较大，直接相乘会溢出的情况下，计算$latex (nm)\% mod $：
 
 <pre class="toolbar:2 wrap:true lang:java decode:true " >long mul_mod(long n, long m, long mod) {
         long ans = 0L;
@@ -582,8 +584,8 @@ In other words,use modular multiplicative inverse.
 
 ## Chinese Remainer Theorem 中国剩余定理
 
-Resolving $latex \begin{cases} x ≡a_1 (mod m_1), \newline x ≡a_2 (mod m_2 ), \newline …, \newline x ≡a_n (mod m_n)). \end{cases} $.  
-解同余方程组$latex \begin{cases} x ≡a_1 (mod m_1), \newline x ≡a_2 (mod m_2 ), \newline …, \newline x ≡a_n (mod m_n)). \end{cases} $。
+Resolving $latex \begin{cases} x ≡a_1 \pmod{m_1}, \newline x ≡a_2 \pmod{m_2}, \newline …, \newline x ≡a_n \pmod{m_n}. \end{cases} $.  
+解同余方程组$latex \begin{cases} x ≡a_1 \pmod{m_1}, \newline x ≡a_2 \pmod{m_2}, \newline …, \newline x ≡a_n \pmod{m_n}. \end{cases} $。
 
 <pre class="toolbar:2 wrap:true lang:java decode:true " >long CRT(long n, long[] a, long[] m) {
         long pro = 1L, res = 0L;
@@ -616,7 +618,8 @@ void init(){
 
 ## Combination Calculation #2 组合数计算2
 
-It is guaranteed that n≥m,but n! should be computed in advance.
+It is guaranteed that $latex n≥m$,but $latex n!$ should be computed in advance.  
+在$latex n≥m$且$latex n!$已求出的前提下，单个计算$latex C_n^m$：
 
 <pre class="toolbar:2 wrap:true lang:java decode:true " >long C(long n, long m, long mod) {
         int a = (int) (n % mod), b = (int) (m % mod);
@@ -644,7 +647,30 @@ It is guaranteed that n≥m,but n! should be computed in advance.
 
 ## Catalan number 卡塔兰数
 
-$latex C_1=1,C_n=C_{n-1}*{(4n-2)}/{(n+1)}$;
+$latex C_n = {2n\choose n} - {2n\choose n+1} = {1\over n+1}{2n\choose n} \quad\text{ for }n\ge 0$;  
+The Catalan numbers satisfy the recurrence relation $latex C_0 = 1 \quad \mbox{and} \quad C_{n+1}=\sum_{i=0}^{n}C_i\,C_{n-i}\quad\text{for }n\ge 0$;  
+moreover,$latex C_n= \frac 1{n+1} \sum_{i=0}^n {n \choose i}^2$.  
+Asymptotically, the Catalan numbers grow as $latex C_n \sim \frac{4^n}{n^{3/2}\sqrt{\pi}}$.  
+组合数学中有非常多的组合结构可以用卡塔兰数来计数。
+
+*   $latex C_n$表示长度2n的dyck word的个数。Dyck word是一个有n个X和n个Y组成的字串，且所有的前缀字串皆满足X的个数大于等于Y的个数。以下为长度为6的dyck words:XXXYYY XYXXYY XYXYXY XXYYXY XXYXYY 
+*   将上例的X换成左括号，Y换成右括号，$latex C_n$表示所有包含n组括号的合法运算式的个数：((())) ()(()) ()()() (())() (()()) 
+*   $latex C_n$表示有n个节点组成不同构二叉树的方案数。 
+*   $latex C_n$表示有2n+1个节点组成不同构满二叉树（full binary tree）的方案数。 
+
+> 证明：  
+> 令1表示进栈，0表示出栈，则可转化为求一个2n位、含n个1、n个0的二进制数，满足从左往右扫描到任意一位时，经过的0数不多于1数。显然含n个1、n个0的2n位二进制数共有$latex {2n \choose n}$个，下面考虑不满足要求的数目。  
+> 考虑一个含n个1、n个0的2n位二进制数，扫描到第2m+1位上时有m+1个0和m个1（容易证明一定存在这样的情况），则后面的0-1排列中必有n-m个1和n-m-1个0。将2m+2及其以后的部分0变成1、1变成0，则对应一个n+1个0和n-1个1的二进制数。反之亦然（相似的思路证明两者一一对应）。  
+> 从而$latex C_n = {2n \choose n} - {2n \choose n + 1} = \frac{1}{n+1}{2n \choose n}$。证毕。
+
+*   $latex C_n$表示所有在n × n格点中不越过对角线的单调路径的个数。一个单调路径从格点左下角出发，在格点右上角结束，每一步均为向上或向右。计算这种路径的个数等价于计算Dyck word的个数：X代表“向右”，Y代表“向上”。
+*   $latex C_n$表示通过连结顶点而将n + 2边的凸多边形分成三角形的方法个数。 
+*   $latex C_n$表示对{1, ..., n}依序进出栈的置换个数。一个置换w是依序进出栈的当S(w) = (1, ..., n),其中S（w）递归定义如下：令w = unv，其中n为w的最大元素，u和v为更短的数列；再令S(w) = S(u)S(v)n，其中S为所有含一个元素的数列的单位元。
+*   $latex C_n$表示集合{1, ..., n}的不交叉划分的个数.那么, Cn永远不大于第n项贝尔数. Cn也表示集合{1, ..., 2n}的不交叉划分的个数，其中每个段落的长度为2。
+*   $latex C_n$表示用n个长方形填充一个高度为n的阶梯状图形的方法个数。
+*   $latex C_n$表示表为2×n的矩阵的标准杨氏矩阵的数量。 也就是说，它是数字 1, 2, ..., 2n 被放置在一个2×n的矩形中并保证每行每列的数字升序排列的方案数。同样的，该式可由勾长公式的一个特殊情形推导得出。 
+
+本例中使用递推公式$latex C_1=1,C_n=\frac{(4n-2)}{(n+1)} \cdot C_{n-1}$;
 
 <pre class="toolbar:2 wrap:true lang:java decode:true " >long C[];
 void get_Catalan(int maxn) {
